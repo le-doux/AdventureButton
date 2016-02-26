@@ -2,6 +2,14 @@
 import luxe.Input;
 import luxe.Vector;
 import ActionButton.Direction;
+import ActionButton.OutroAnimation;
+
+//file IO
+import sys.io.File;
+import sys.io.FileOutput;
+import sys.io.FileInput;
+import haxe.Json;
+
 
 class Main extends luxe.Game {
 
@@ -21,6 +29,8 @@ class Main extends luxe.Game {
     } //ready
 
 	override function onkeydown(e:KeyEvent) {
+
+		//switch edit modes
 		if (e.keycode == Key.key_1) {
 			button.showStart();
 		}
@@ -28,13 +38,21 @@ class Main extends luxe.Game {
 			button.showEnd();
 		}
 
+		//preview animations
 		if (e.keycode == Key.key_3) {
 			button.animateAppear();
 		}
 		else if (e.keycode == Key.key_4) {
 			button.animatePull();
 		}
+		else if (e.keycode == Key.key_5) {
+			button.animateOutro();
+		}
+		else if (e.keycode == Key.key_6) {
+			button.animateSequence();
+		}
 
+		//change size
 		if (e.keycode == Key.key_q) {
 			if (button.curState == 0) {
 				button.startSize += 5;
@@ -54,6 +72,14 @@ class Main extends luxe.Game {
 			button.updateCurSize();
 		}
 
+		//change outro style
+		if (e.keycode == Key.key_z) {
+			var i = button.outro.getIndex();
+			i = (i + 1) % OutroAnimation.getConstructors().length;
+			button.outro = OutroAnimation.createByIndex(i);
+		}
+
+		//change pull dir
 		if (e.keycode == Key.left) {
 			button.pullDir = Direction.Left;
 		}
@@ -65,6 +91,21 @@ class Main extends luxe.Game {
 		}
 		else if (e.keycode == Key.down) {
 			button.pullDir = Direction.Down;
+		}
+
+		//save file
+		if (e.keycode == Key.key_s && e.mod.meta) {
+			//get path & open file
+			var path = Luxe.core.app.io.module.dialog_save();
+			var output = File.write(path);
+
+			//get data & write it
+			var saveJson = button.toJson();
+			var saveStr = Json.stringify(saveJson, null, "    ");
+			output.writeString(saveStr);
+
+			//close file
+			output.close();
 		}
 	}
 

@@ -2,6 +2,7 @@ import luxe.Color;
 import luxe.Vector;
 import phoenix.geometry.*;
 import luxe.tween.Actuate;
+import luxe.tween.actuators.GenericActuator.IGenericActuator;
 using ColorExtender;
 
 enum Direction {
@@ -38,10 +39,10 @@ class ActionButton {
 
 	}
 
-	public function animateAppear() {
+	public function animateAppear() : IGenericActuator {
 		curSize = 0;
-		Actuate.tween(this, 1.0, {curSize: startSize})
-					.ease(luxe.tween.easing.Bounce.easeIn)
+		return Actuate.tween(this, 1.0, {curSize: startSize})
+					.ease(luxe.tween.easing.Bounce.easeOut)
 					.onComplete(function(){
 						updateCurSize();
 					});
@@ -49,31 +50,55 @@ class ActionButton {
 
 	public function animatePull() {
 		curSize = startSize;
-		Actuate.tween(this, 3.0, {curSize: startSize*endSizeMult})
+		return Actuate.tween(this, 3.0, {curSize: startSize*endSizeMult})
 					.ease(luxe.tween.easing.Quad.easeOut)
 					.onComplete(function(){
 						updateCurSize();
 					});
 	}
 
-	public function animateOutro() {
+	public function animateOutro() { //returning this will be tricky
 		switch outro {
 			case OutroAnimation.Disappear:
+				animateDisappear();
 			case OutroAnimation.FillScreen:
+				animateFillScreen();
 			case OutroAnimation.Emphasize:
+				animateEmphasize();
 		}
 	}
 
 	function animateDisappear() {
-
+		curSize = startSize * endSizeMult;
+		return Actuate.tween(this, 1.0, {curSize: 0})
+				.ease(luxe.tween.easing.Elastic.easeIn);
 	}
 
 	function animateFillScreen() {
-
+		curSize = startSize * endSizeMult;
+		return Actuate.tween(this, 1.0, {curSize: Luxe.screen.width})
+				.ease(luxe.tween.easing.Quad.easeIn);
 	}
 
-	function animateEmphasize() {
+	function animateEmphasize() { //how to return? (we could use a callback)
+		curSize = startSize * endSizeMult;
+		Actuate.tween(this, 0.6, {curSize: startSize * (endSizeMult * 1.5)})
+				.ease(luxe.tween.easing.Bounce.easeOut)
+				.onComplete(function() {
+					Actuate.tween(this, 0.2, {curSize: 0})
+							.delay(0.4)
+							.ease(luxe.tween.easing.Quad.easeIn);
+				});
+	}
 
+	public function animateSequence() {
+		animateAppear()
+			.onComplete(function() {
+				animatePull()
+					.onComplete(function(){
+							animateOutro();
+						});
+			});
 	}
 
 	public function showStart() {
