@@ -4,6 +4,7 @@ import phoenix.geometry.*;
 import luxe.tween.Actuate;
 import luxe.tween.actuators.GenericActuator.IGenericActuator;
 using ColorExtender;
+using PolylineExtender;
 
 enum Direction {
 	Left;
@@ -18,10 +19,11 @@ enum OutroAnimation {
 	Emphasize;
 }
 
+//maybe this should all be a "Visual" class
 class ActionButton {
 	//saveable data (extract into its own struct-like object?)
 	var backgroundColor : Color;
-	var illustrationColor : Color;
+	public var illustrationColor : Color;
 	public var terrainPos : Float;
 	public var height : Float;
 	public var startSize : Float;
@@ -35,8 +37,35 @@ class ActionButton {
 	public var curSize : Float;
 	public var curState = 0; //0 - start, 1 - end
 
+	public var illustrations : Array<Array<Polystroke>> = [[],[]];
+	public var curIllustrationIndex = 0;
+	public var curIllustration (get, null) : Array<Polystroke>;
+
 	public function new() {
 
+	}
+
+	public function get_curIllustration() : Array<Polystroke> {
+		return illustrations[curIllustrationIndex];
+	}
+
+	//could be replaced with setter for curIllustrationIndex
+	public function switchIllustration(i) {
+		hideIllustration(curIllustrationIndex);
+		curIllustrationIndex = i;
+		showIllustration(curIllustrationIndex);
+	}
+
+	public function showIllustration(i) {
+		for (p in illustrations[i]) {
+			p.visible = true;
+		}
+	}
+
+	public function hideIllustration(i) {
+		for (p in illustrations[i]) {
+			p.visible = false;
+		}
 	}
 
 	public function animateAppear() : IGenericActuator {
@@ -104,11 +133,13 @@ class ActionButton {
 	public function showStart() {
 		curSize = startSize;
 		curState = 0;
+		switchIllustration(0);
 	}
 
 	public function showEnd() {
 		curSize = startSize * endSizeMult;
 		curState = 1;
+		switchIllustration(1);	
 	}
 
 	public function updateCurSize() { //the worst kind of hack
@@ -234,6 +265,14 @@ class ActionButton {
 			immediate : true
 		});
 
+		var sizeDelta = (startSize * endSizeMult) - startSize;
+		if ((curSize - startSize) < sizeDelta/2) {
+			if (curIllustrationIndex != 0) switchIllustration(0);
+		}
+		else {
+			if (curIllustrationIndex != 1) switchIllustration(1);
+		}
+
 		if (curSize >= startSize) {
 			//this is a ridiculous switch statement (remove as soon as possible)
 			switch pullDir {
@@ -316,6 +355,15 @@ class ActionButton {
 	}
 
 	public function toJson() {
+		var illustration1 = [];
+		for (p in illustrations[0]) {
+			illustration1.push(p.toJson());
+		}
+		var illustration2 = [];
+		for (p in illustrations[1]) {
+			illustration2.push(p.toJson());
+		}
+
 		return {
 			type : "action",
 			backgroundColor : backgroundColor.toJson(),
@@ -325,7 +373,9 @@ class ActionButton {
 			startSize : startSize,
 			endSizeMult : endSizeMult,
 			pullDir : pullDir.getName(),
-			outro : outro.getName()
+			outro : outro.getName(),
+			illustration1: illustration1,
+			illustration2: illustration2
 		};
 	}
 
@@ -338,6 +388,16 @@ class ActionButton {
 		endSizeMult = json.endSizeMult;
 		pullDir = Direction.createByName(json.pullDir);
 		outro = OutroAnimation.createByName(json.outro);
+
+		for (j in cast(json.illustration1, Array<Dynamic>)) {
+			var p = new Polystroke({},[]).fromJson(j);
+			illustrations[0].push(p);
+		}
+		for (j in cast(json.illustration2, Array<Dynamic>)) {
+			var p = new Polystroke({},[]).fromJson(j);
+			illustrations[1].push(p);
+		}
+		switchIllustration(0);
 
 		curSize = startSize;
 

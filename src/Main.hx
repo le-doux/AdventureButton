@@ -1,8 +1,12 @@
 
 import luxe.Input;
 import luxe.Vector;
+import luxe.Color;
+
 import ActionButton.Direction;
 import ActionButton.OutroAnimation;
+
+using PolylineExtender;
 
 //file IO
 import sys.io.File;
@@ -14,6 +18,7 @@ import haxe.Json;
 class Main extends luxe.Game {
 
 	var button : ActionButton;
+	var curStroke : Array<Vector> = [];
 
     override function ready() {
     	button = (new ActionButton()).fromJson({
@@ -24,7 +29,9 @@ class Main extends luxe.Game {
     		startSize : 100,
     		endSizeMult : 2,
     		pullDir : "Down",
-    		outro : "FillScreen"
+    		outro : "FillScreen",
+    		illustration1: [],
+    		illustration2: []
     	});
     } //ready
 
@@ -117,6 +124,39 @@ class Main extends luxe.Game {
 
     } //onkeyup
 
+    override function onmousedown( e:MouseEvent ) {
+
+		var screen_point = e.pos;
+		var world_point = Luxe.camera.screen_point_to_world( screen_point );
+
+		curStroke = [];
+		curStroke.push(world_point);
+
+	}
+
+	override function onmousemove( e:MouseEvent ) {
+
+		var screen_point = e.pos;
+		var world_point = Luxe.camera.screen_point_to_world( screen_point );
+
+		if (Luxe.input.mousedown(1)) {
+			curStroke.push(world_point);
+		}
+	}
+
+	override function onmouseup( e:MouseEvent ) {
+
+		var screen_point = e.pos;
+		var world_point = Luxe.camera.screen_point_to_world( screen_point );
+
+		if (curStroke.length > 0) {
+			var p = new Polystroke({color : new Color(1,1,1), batcher : Luxe.renderer.batcher, depth: 50}, curStroke.clone());
+			button.curIllustration.push(p);
+		}
+		curStroke = [];
+
+	}
+
     override function update(dt:Float) {
     	Luxe.draw.text({
     		pos: new Vector(0,0),
@@ -126,6 +166,19 @@ class Main extends luxe.Game {
     	});
 
     	button.drawImmediate();
+
+    	//draw tmp drawing
+		for (i in 1 ... curStroke.length) {
+			var p0 = curStroke[i-1];
+			var p1 = curStroke[i];
+			Luxe.draw.line({
+				p0 : p0,
+				p1 : p1,
+				color : new Color(1,1,1),
+				depth : 50,
+				immediate : true
+			});
+		}
     } //update
 
 
