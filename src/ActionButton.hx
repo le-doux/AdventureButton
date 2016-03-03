@@ -3,6 +3,7 @@ import luxe.Vector;
 import phoenix.geometry.*;
 import luxe.tween.Actuate;
 import luxe.tween.actuators.GenericActuator.IGenericActuator;
+import luxe.Visual;
 using ColorExtender;
 using PolylineExtender;
 
@@ -20,29 +21,51 @@ enum OutroAnimation {
 }
 
 //maybe this should all be a "Visual" class
-class ActionButton {
+class ActionButton extends Visual {
 	//saveable data (extract into its own struct-like object?)
 	var backgroundColor : Color;
 	public var illustrationColor : Color;
 	public var terrainPos : Float;
 	public var height : Float;
-	public var startSize : Float;
-	public var endSizeMult : Float;
 	public var pullDir : Direction;
 	public var outro : OutroAnimation;
 
 	public var terrain : Terrain;
 	var geo : Array<Geometry> = [];
 
+	public var startSize : Float;
+	public var endSize : Float;
 	public var curSize : Float;
+	public var stateController = 0; //needs a better name
+
 	public var curState = 0; //0 - start, 1 - end
 
 	public var illustrations : Array<Array<Polystroke>> = [[],[]];
 	public var curIllustrationIndex = 0;
 	public var curIllustration (get, null) : Array<Polystroke>;
 
+	/*
 	public function new() {
 
+	}
+	*/
+	public override function new(_options : luxe.options.VisualOptions) {
+		super(_options);
+		geometry = Luxe.draw.circle({
+			x : 0, y : 0,
+			r : 100, //arbitrary
+			batcher : _options.batcher
+		});
+	}
+
+	public override function update(dt : Float) {
+		if (stateController <= 1) {
+			curSize = startSize * stateController;
+		}
+		else if (stateController <= 2) {
+			curSize = startSize + ((endSize - startSize) * (stateController - 1));
+		}
+		scale = new Vector(curSize, curSize);
 	}
 
 	public function get_curIllustration() : Array<Polystroke> {
@@ -79,7 +102,7 @@ class ActionButton {
 
 	public function animatePull() {
 		curSize = startSize;
-		return Actuate.tween(this, 3.0, {curSize: startSize*endSizeMult})
+		return Actuate.tween(this, 3.0, {curSize: startSize*endSize})
 					.ease(luxe.tween.easing.Quad.easeOut)
 					.onComplete(function(){
 						updateCurSize();
@@ -98,20 +121,20 @@ class ActionButton {
 	}
 
 	function animateDisappear() {
-		curSize = startSize * endSizeMult;
+		curSize = startSize * endSize;
 		return Actuate.tween(this, 1.0, {curSize: 0})
 				.ease(luxe.tween.easing.Elastic.easeIn);
 	}
 
 	function animateFillScreen() {
-		curSize = startSize * endSizeMult;
+		curSize = startSize * endSize;
 		return Actuate.tween(this, 1.0, {curSize: Luxe.screen.width})
 				.ease(luxe.tween.easing.Quad.easeIn);
 	}
 
 	function animateEmphasize() { //how to return? (we could use a callback)
-		curSize = startSize * endSizeMult;
-		Actuate.tween(this, 0.6, {curSize: startSize * (endSizeMult * 1.5)})
+		curSize = startSize * endSize;
+		Actuate.tween(this, 0.6, {curSize: startSize * (endSize * 1.5)})
 				.ease(luxe.tween.easing.Bounce.easeOut)
 				.onComplete(function() {
 					Actuate.tween(this, 0.2, {curSize: 0})
@@ -131,20 +154,36 @@ class ActionButton {
 	}
 
 	public function showStart() {
+		/*
 		curSize = startSize;
 		curState = 0;
 		switchIllustration(0);
+		*/
+		curState = 0;
+		stateController = 1;
+		//curSize = startSize;
+		//scale = new Vector(1,1);
 	}
 
 	public function showEnd() {
-		curSize = startSize * endSizeMult;
+		/*
+		curSize = startSize * endSize;
 		curState = 1;
 		switchIllustration(1);	
+		*/
+		curState = 1;
+		stateController = 2;
+		//curSize = endSize;
+		//scale = new Vector(endSize, endSize);
 	}
 
 	public function updateCurSize() { //the worst kind of hack
+		/*
 		if (curState == 0) curSize = startSize;
-		if (curState == 1) curSize = startSize * endSizeMult;
+		if (curState == 1) curSize = startSize * endSize;
+		*/
+		if (curState == 0) scale = new Vector(1,1);
+		if (curState == 1) scale = new Vector(endSize, endSize);
 	}
 
 	//do I need a dynamic draw too? (especially for the arrows)
@@ -174,7 +213,7 @@ class ActionButton {
 		geo.push(
 			Luxe.draw.ring({
 				x : worldPos.x, y : worldPos.y,
-				r : startSize * endSizeMult,
+				r : startSize * endSize,
 				color : illustrationColor,
 				depth : 1
 			})
@@ -265,7 +304,7 @@ class ActionButton {
 			immediate : true
 		});
 
-		var sizeDelta = (startSize * endSizeMult) - startSize;
+		var sizeDelta = (startSize * endSize) - startSize;
 		if ((curSize - startSize) < sizeDelta/2) {
 			if (curIllustrationIndex != 0) switchIllustration(0);
 		}
@@ -347,7 +386,7 @@ class ActionButton {
 
 		Luxe.draw.ring({
 			x : worldPos.x, y : worldPos.y,
-			r : startSize * endSizeMult,
+			r : startSize * endSize,
 			color : illustrationColor,
 			depth : 1,
 			immediate : true
@@ -371,7 +410,7 @@ class ActionButton {
 			terrainPos : terrainPos,
 			height : height,
 			startSize : startSize,
-			endSizeMult : endSizeMult,
+			endSize : endSize,
 			pullDir : pullDir.getName(),
 			outro : outro.getName(),
 			illustration1: illustration1,
@@ -385,7 +424,7 @@ class ActionButton {
 		terrainPos = json.terrainPos;
 		height = json.height;
 		startSize = json.startSize;
-		endSizeMult = json.endSizeMult;
+		endSize = json.endSize;
 		pullDir = Direction.createByName(json.pullDir);
 		outro = OutroAnimation.createByName(json.outro);
 
@@ -400,6 +439,9 @@ class ActionButton {
 		switchIllustration(0);
 
 		curSize = startSize;
+
+		//test stuff
+		color = backgroundColor;
 
 		return this;
 	}

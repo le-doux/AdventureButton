@@ -21,18 +21,22 @@ class Main extends luxe.Game {
 	var curStroke : Array<Vector> = [];
 
     override function ready() {
-    	button = (new ActionButton()).fromJson({
-    		backgroundColor : {r:0,g:0,b:1},
-    		illustrationColor : {r:1,g:1,b:1},
-    		terrainPos : 0,
-    		height : 0,
-    		startSize : 100,
-    		endSizeMult : 2,
-    		pullDir : "Down",
-    		outro : "FillScreen",
-    		illustration1: [],
-    		illustration2: []
-    	});
+    	button = (new ActionButton({
+    			/*color : new Color(0,0,1),*/
+    			pos : Luxe.screen.mid
+    		}))
+			.fromJson({
+				backgroundColor : {r:0,g:0,b:1},
+				illustrationColor : {r:1,g:1,b:1},
+				terrainPos : 0,
+				height : 0,
+				startSize : 1,
+				endSize : 2,
+				pullDir : "Down",
+				outro : "FillScreen",
+				illustration1: [],
+				illustration2: []
+			});
     } //ready
 
 	override function onkeydown(e:KeyEvent) {
@@ -62,21 +66,23 @@ class Main extends luxe.Game {
 		//change size
 		if (e.keycode == Key.key_q) {
 			if (button.curState == 0) {
-				button.startSize += 5;
+				//button.startSize += 5;
+				button.startSize += 0.1;
 			}
 			else {
-				button.endSizeMult += 0.1;
+				button.endSize += 0.1;
 			}
-			button.updateCurSize();
+			//button.updateCurSize(); //hack-ish if you ask me
 		}
 		else if (e.keycode == Key.key_a) {
 			if (button.curState == 0) {
-				button.startSize -= 5;
+				//button.startSize -= 5;
+				button.startSize -= 0.1;
 			}
 			else {
-				button.endSizeMult -= 0.1;
+				button.endSize -= 0.1;
 			}
-			button.updateCurSize();
+			//button.updateCurSize();
 		}
 
 		//change outro style
@@ -165,7 +171,7 @@ class Main extends luxe.Game {
     		immediate: true
     	});
 
-    	button.drawImmediate();
+    	//button.drawImmediate();
 
     	//draw tmp drawing
 		for (i in 1 ... curStroke.length) {
