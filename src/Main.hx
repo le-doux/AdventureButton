@@ -37,16 +37,19 @@ class Main extends luxe.Game {
 				illustration1: [],
 				illustration2: []
 			});
+
+		button.editStart();
     } //ready
 
 	override function onkeydown(e:KeyEvent) {
 
+		
 		//switch edit modes
 		if (e.keycode == Key.key_1) {
-			button.showStart();
+			button.editStart();
 		}
 		else if (e.keycode == Key.key_2) {
-			button.showEnd();
+			button.editEnd();
 		}
 
 		//preview animations
@@ -65,24 +68,10 @@ class Main extends luxe.Game {
 
 		//change size
 		if (e.keycode == Key.key_q) {
-			if (button.curState == 0) {
-				//button.startSize += 5;
-				button.startSize += 0.1;
-			}
-			else {
-				button.endSize += 0.1;
-			}
-			//button.updateCurSize(); //hack-ish if you ask me
+			button.curSize += 0.1;
 		}
 		else if (e.keycode == Key.key_a) {
-			if (button.curState == 0) {
-				//button.startSize -= 5;
-				button.startSize -= 0.1;
-			}
-			else {
-				button.endSize -= 0.1;
-			}
-			//button.updateCurSize();
+			button.curSize -= 0.1;
 		}
 
 		//change outro style
