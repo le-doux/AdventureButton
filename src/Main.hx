@@ -145,8 +145,14 @@ class Main extends luxe.Game {
 		var world_point = Luxe.camera.screen_point_to_world( screen_point );
 
 		if (curStroke.length > 0) {
-			var p = new Polystroke({color : new Color(1,1,1), batcher : Luxe.renderer.batcher, depth: 50}, curStroke.clone());
-			button.curIllustration.push(p);
+			var shiftedStroke = [];
+			for (point in curStroke) {
+				point.subtract(button.pos).divideScalar(button.scale.x);
+				shiftedStroke.push(point);
+			}
+
+			var p = new Polystroke({color : new Color(1,1,1), batcher : Luxe.renderer.batcher, depth: 50}, shiftedStroke /*curStroke*/);
+			button.addStrokeToIllustration(p);
 		}
 		curStroke = [];
 

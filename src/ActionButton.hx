@@ -1,8 +1,10 @@
 import luxe.Color;
 import luxe.Vector;
+import luxe.Entity;
 import phoenix.geometry.*;
 import luxe.tween.Actuate;
 import luxe.tween.actuators.GenericActuator.IGenericActuator;
+import luxe.tween.actuators.GenericActuator;
 import luxe.Visual;
 using ColorExtender;
 using PolylineExtender;
@@ -23,6 +25,7 @@ enum OutroAnimation {
 //maybe this should all be a "Visual" class
 class ActionButton extends Visual {
 
+	////
 	public var startSize : Float;
 	public var endSize : Float;
 	public var curSize (default, set) : Float;
@@ -30,10 +33,15 @@ class ActionButton extends Visual {
 	private var editFrame = 0;
 	private var isEditing = false;
 
-	public var pullDir : Direction;
+	public var pullDir (default, set) : Direction;
 	public var outro : OutroAnimation;
 
+	public var illustrations : Array<Array<Polystroke>> = [[],[]];
+	/////
 
+	///
+	private var pullTab : Visual;
+	//
 
 	//saveable data (extract into its own struct-like object?)
 	var backgroundColor : Color;
@@ -48,7 +56,6 @@ class ActionButton extends Visual {
 
 	public var curState = 0; //0 - start, 1 - end
 
-	public var illustrations : Array<Array<Polystroke>> = [[],[]];
 	public var curIllustrationIndex = 0;
 	public var curIllustration /*(get, null)*/ : Array<Polystroke>;
 
@@ -59,6 +66,84 @@ class ActionButton extends Visual {
 			r : 100, //arbitrary
 			batcher : _options.batcher
 		});
+
+		var ring = new Visual({
+			geometry: Luxe.draw.ring({
+							x : 0, y : 0,
+							r : 102, //arbitrary,
+							color : new Color(1,1,1), //temporary
+							batcher : _options.batcher
+						}),
+			parent: this
+		});
+
+		pullTab = new Visual({no_geometry:true, parent:this});
+		new Visual({
+			geometry: Luxe.draw.line({
+					p0 : new Vector(-10,110),
+					p1 : new Vector(0,120),
+					color : new Color(1,1,1), //temporary,
+					batcher : _options.batcher
+				}),
+			parent: pullTab
+		});
+		new Visual({
+			geometry: Luxe.draw.line({
+					p0 : new Vector(10,110),
+					p1 : new Vector(0,120),
+					color : new Color(1,1,1), //temporary,
+					batcher : _options.batcher
+				}),
+			parent: pullTab
+		});
+	}
+
+	//TODO make the illustration change as you pull!
+	public override function update(dt : Float) {
+
+		//inefficient to do this every loop?
+		if (curSize - startSize >= (endSize - startSize)/2 
+			&& illustrations[1].length > 0) {
+			for (s in illustrations[0]) {
+				s.set_visible(false);
+			}
+			for (s in illustrations[1]) {
+				s.set_visible(true);
+			}
+		}
+		else {
+			for (s in illustrations[0]) {
+				s.set_visible(true);
+			}
+			for (s in illustrations[1]) {
+				s.set_visible(false);
+			}
+		}
+	}
+
+	public function set_pullDir(d : Direction) : Direction {
+		pullDir = d;
+		switch pullDir {
+			case Direction.Left:
+				pullTab.rotation_z = 90;
+			case Direction.Right:
+				pullTab.rotation_z = 270;
+			case Direction.Up:
+				pullTab.rotation_z = 180;
+			case Direction.Down:
+				pullTab.rotation_z = 0;
+		}
+		return pullDir;
+	}
+
+	public function addStrokeToIllustration(p : Polystroke) {
+		//this works, but it feels like I should be using a transformation matrix or something
+		//p.pos.subtract(this.pos).divideScalar(this.scale.x);
+		//p.scale.divideScalar(this.scale.x);
+		p.color = illustrationColor;
+
+		p.parent = this;
+		illustrations[editFrame].push(p);
 	}
 
 	function set_curSize(size) : Float {
@@ -99,14 +184,14 @@ class ActionButton extends Visual {
 					.ease(luxe.tween.easing.Quad.easeOut);
 	}
 
-	public function animateOutro() : IGenericActuator { //returning this will be tricky
+	public function animateOutro() { //returning this will be tricky
 		switch outro {
 			case OutroAnimation.Disappear:
-				return animateDisappear();
+				animateDisappear();
 			case OutroAnimation.FillScreen:
-				return animateFillScreen();
+				animateFillScreen();
 			case OutroAnimation.Emphasize:
-				return animateEmphasize();
+				animateEmphasize();
 		}
 	}
 
@@ -124,31 +209,18 @@ class ActionButton extends Visual {
 				.ease(luxe.tween.easing.Quad.easeIn);
 	}
 
-	//TODO still broken
+	//TODO can't figure out how to return a two deep animation
 	function animateEmphasize() {
 		isEditing = false; //hack?
 		curSize = endSize;
-
-		//hacky spoof object
-		var returnObj = {
-			complete : null,
-			onComplete : function(method : Dynamic) {
-				returnObj.complete = method;
-			},
-		};
 
 		Actuate.tween(this, 0.6, {curSize: (endSize * 1.5)})
 				.ease(luxe.tween.easing.Bounce.easeOut)
 				.onComplete(function() {
 					Actuate.tween(this, 0.2, {curSize: 0})
 							.delay(0.4)
-							.ease(luxe.tween.easing.Quad.easeIn)
-							.onComplete(function() {
-								returnObj.complete();
-							});
+							.ease(luxe.tween.easing.Quad.easeIn);
 				});
-
-		return returnObj;
 	}
 
 	public function animateSequence() { //can't figure out how to return this
@@ -210,6 +282,13 @@ class ActionButton extends Visual {
 
 		//test stuff
 		color = backgroundColor;
+		//color children (w/ plenty of hacks)
+		for (c in this.children) {
+			cast(c, Visual).color = illustrationColor;
+			for (c2 in c.children) {
+				cast(c2, Visual).color = illustrationColor;
+			}
+		};
 
 		return this;
 	}
