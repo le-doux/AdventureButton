@@ -35,7 +35,8 @@ class Main extends luxe.Game {
 				pullDir : "Down",
 				outro : "FillScreen",
 				illustration1: [],
-				illustration2: []
+				illustration2: [],
+				name: "useless_name"
 			});
 
 		button.editStart();
@@ -102,6 +103,7 @@ class Main extends luxe.Game {
 			var output = File.write(path);
 
 			//get data & write it
+			button.name = path.split("/")[path.split("/").length-1];
 			var saveJson = button.toJson();
 			var saveStr = Json.stringify(saveJson, null, "    ");
 			output.writeString(saveStr);

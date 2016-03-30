@@ -4,6 +4,74 @@
 		"selected_items":
 		[
 			[
+				"illus",
+				"illustrations"
+			],
+			[
+				"rotat",
+				"p· rotation_z	Float"
+			],
+			[
+				"ch",
+				"p· children	Array<luxe.Entity>"
+			],
+			[
+				"ro",
+				"p· rotation_z	Float"
+			],
+			[
+				"pul",
+				"pullTab"
+			],
+			[
+				"sc",
+				"p· scale	luxe.Vector"
+			],
+			[
+				"curS",
+				"curStroke"
+			],
+			[
+				"ad",
+				"m· add	 "
+			],
+			[
+				"p",
+				"p· pos	phoenix.Vector"
+			],
+			[
+				"m",
+				"p· matrix	phoenix.Matrix"
+			],
+			[
+				"lo",
+				"p· local	phoenix.Spatial"
+			],
+			[
+				"to",
+				"m· toLocalSpace	Array<luxe.Vector>"
+			],
+			[
+				"tr",
+				"p· transform	luxe.Transform"
+			],
+			[
+				"div",
+				"m· divideScalar	phoenix.Vector"
+			],
+			[
+				"illust",
+				"illustrations"
+			],
+			[
+				"hack",
+				"hackObj"
+			],
+			[
+				"retur",
+				"returnObj"
+			],
+			[
 				"retun",
 				"returnObj"
 			],
@@ -28,10 +96,6 @@
 				"startSize"
 			],
 			[
-				"curS",
-				"curSize"
-			],
-			[
 				"ba",
 				"p· batcher	Null<phoenix.Batcher>"
 			],
@@ -40,20 +104,12 @@
 				"stateController"
 			],
 			[
-				"sc",
-				"p· screen	luxe.Screen"
-			],
-			[
 				"illustra",
 				"illustration1"
 			],
 			[
 				"illu",
 				"illustrations2"
-			],
-			[
-				"illus",
-				"illustrations"
 			],
 			[
 				"ill",
@@ -248,10 +304,6 @@
 				"screen_point"
 			],
 			[
-				"p",
-				"p· pos	luxe.Vector"
-			],
-			[
 				"Fi",
 				"p· FileSystem	FileSystem"
 			],
@@ -314,10 +366,6 @@
 			[
 				"level2",
 				"level2Stuff"
-			],
-			[
-				"ad",
-				"m· add	 "
 			],
 			[
 				"charc",
@@ -386,10 +434,6 @@
 			[
 				"Te",
 				"p· TextAlign	TextAlign"
-			],
-			[
-				"m",
-				"p· mid	luxe.Vector"
 			],
 			[
 				"charac",
@@ -470,50 +514,6 @@
 			[
 				"iscammov",
 				"isCamMovingRight"
-			],
-			[
-				"isCammovin",
-				"isCamMovingRight"
-			],
-			[
-				"iscammo",
-				"isCamMovingLeft"
-			],
-			[
-				"isCamtoofar",
-				"isCamTooFarRight"
-			],
-			[
-				"ispla",
-				"isPlayerBlockedLeft"
-			],
-			[
-				"resis",
-				"resistanceFactor"
-			],
-			[
-				"iscamtoofr",
-				"isCamTooFarRight"
-			],
-			[
-				"iscam",
-				"isCamTooFarLeft"
-			],
-			[
-				"resi",
-				"resistanceFactor"
-			],
-			[
-				"isplayer",
-				"isPlayerBlockedRight"
-			],
-			[
-				"res",
-				"resistanceFactor"
-			],
-			[
-				"isCamo",
-				"isCamTooFarRight"
 			]
 		]
 	},
@@ -531,7 +531,7 @@
 			"file": "src/Main.hx",
 			"settings":
 			{
-				"buffer_size": 3733,
+				"buffer_size": 3901,
 				"line_ending": "Unix"
 			}
 		},
@@ -539,15 +539,7 @@
 			"file": "src/ActionButton.hx",
 			"settings":
 			{
-				"buffer_size": 5105,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "\n\n	public override function update(dt : Float) {\n		if (stateController <= 1) {\n			curSize = startSize * stateController;\n		}\n		else if (stateController <= 2) {\n			curSize = startSize + ((endSize - startSize) * (stateController - 1));\n		}\n		scale = new Vector(curSize, curSize);\n	}\n\n	public function get_curIllustration() : Array<Polystroke> {\n		return illustrations[curIllustrationIndex];\n	}\n\n	//could be replaced with setter for curIllustrationIndex\n	public function switchIllustration(i) {\n		hideIllustration(curIllustrationIndex);\n		curIllustrationIndex = i;\n		showIllustration(curIllustrationIndex);\n	}\n\n	public function showIllustration(i) {\n		for (p in illustrations[i]) {\n			p.visible = true;\n		}\n	}\n\n	public function hideIllustration(i) {\n		for (p in illustrations[i]) {\n			p.visible = false;\n		}\n	}\n\n	public function animateAppear() : IGenericActuator {\n		curSize = 0;\n		return Actuate.tween(this, 1.0, {curSize: startSize})\n					.ease(luxe.tween.easing.Bounce.easeOut)\n					.onComplete(function(){\n						updateCurSize();\n					});\n	}\n\n	public function animatePull() {\n		curSize = startSize;\n		return Actuate.tween(this, 3.0, {curSize: startSize*endSize})\n					.ease(luxe.tween.easing.Quad.easeOut)\n					.onComplete(function(){\n						updateCurSize();\n					});\n	}\n\n	public function animateOutro() { //returning this will be tricky\n		switch outro {\n			case OutroAnimation.Disappear:\n				animateDisappear();\n			case OutroAnimation.FillScreen:\n				animateFillScreen();\n			case OutroAnimation.Emphasize:\n				animateEmphasize();\n		}\n	}\n\n	function animateDisappear() {\n		curSize = startSize * endSize;\n		return Actuate.tween(this, 1.0, {curSize: 0})\n				.ease(luxe.tween.easing.Elastic.easeIn);\n	}\n\n	function animateFillScreen() {\n		curSize = startSize * endSize;\n		return Actuate.tween(this, 1.0, {curSize: Luxe.screen.width})\n				.ease(luxe.tween.easing.Quad.easeIn);\n	}\n\n	function animateEmphasize() { //how to return? (we could use a callback)\n		curSize = startSize * endSize;\n		Actuate.tween(this, 0.6, {curSize: startSize * (endSize * 1.5)})\n				.ease(luxe.tween.easing.Bounce.easeOut)\n				.onComplete(function() {\n					Actuate.tween(this, 0.2, {curSize: 0})\n							.delay(0.4)\n							.ease(luxe.tween.easing.Quad.easeIn);\n				});\n	}\n\n	public function animateSequence() {\n		animateAppear()\n			.onComplete(function() {\n				animatePull()\n					.onComplete(function(){\n							animateOutro();\n						});\n			});\n	}\n\n	public function showStart() {\n		/*\n		curSize = startSize;\n		curState = 0;\n		switchIllustration(0);\n		*/\n		curState = 0;\n		stateController = 1;\n		//curSize = startSize;\n		//scale = new Vector(1,1);\n	}\n\n	public function showEnd() {\n		/*\n		curSize = startSize * endSize;\n		curState = 1;\n		switchIllustration(1);	\n		*/\n		curState = 1;\n		stateController = 2;\n		//curSize = endSize;\n		//scale = new Vector(endSize, endSize);\n	}\n\n	public function updateCurSize() { //the worst kind of hack\n		/*\n		if (curState == 0) curSize = startSize;\n		if (curState == 1) curSize = startSize * endSize;\n		*/\n		if (curState == 0) scale = new Vector(1,1);\n		if (curState == 1) scale = new Vector(endSize, endSize);\n	}\n\n	//do I need a dynamic draw too? (especially for the arrows)\n	public function draw() {\n		var worldPos = terrain.worldPosFromTerrainPos(terrainPos);\n		worldPos.y -= height; //height above the terrain\n		geo.push(\n			Luxe.draw.circle({\n				x : worldPos.x, y : worldPos.y,\n				r : startSize,\n				color : backgroundColor,\n				depth : 0\n			})\n		);\n\n		geo.push(\n			Luxe.draw.ring({\n				x : worldPos.x, y : worldPos.y,\n				r : startSize,\n				color : illustrationColor,\n				depth : 1\n			})\n		);\n\n		/*\n		//draw final size too\n		geo.push(\n			Luxe.draw.ring({\n				x : worldPos.x, y : worldPos.y,\n				r : startSize * endSize,\n				color : illustrationColor,\n				depth : 1\n			})\n		);\n		*/\n\n		//this is a ridiculous switch statement (remove as soon as possible)\n		switch pullDir {\n			case Direction.Left:\n				geo.push(\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x - startSize - 30, worldPos.y),\n						p1 : new Vector(worldPos.x - startSize - 10, worldPos.y - 10),\n						color : illustrationColor\n					})\n				);\n				geo.push(\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x - startSize - 30, worldPos.y),\n						p1 : new Vector(worldPos.x - startSize - 10, worldPos.y + 10),\n						color : illustrationColor\n					})\n				);\n			case Direction.Right:\n				geo.push(\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x + startSize + 30, worldPos.y),\n						p1 : new Vector(worldPos.x + startSize + 10, worldPos.y - 10),\n						color : illustrationColor\n					})\n				);\n				geo.push(\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x + startSize + 30, worldPos.y),\n						p1 : new Vector(worldPos.x + startSize + 10, worldPos.y + 10),\n						color : illustrationColor\n					})\n				);\n			case Direction.Up:\n				geo.push(\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x, worldPos.y - startSize - 10),\n						p1 : new Vector(worldPos.x - 10, worldPos.y - startSize - 30),\n						color : illustrationColor\n					})\n				);\n				geo.push(\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x, worldPos.y - startSize - 10),\n						p1 : new Vector(worldPos.x + 10, worldPos.y - startSize - 30),\n						color : illustrationColor\n					})\n				);\n			case Direction.Down:\n				geo.push(\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x, worldPos.y + startSize + 30),\n						p1 : new Vector(worldPos.x - 10, worldPos.y + startSize + 10),\n						color : illustrationColor\n					})\n				);\n				geo.push(\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x, worldPos.y + startSize + 30),\n						p1 : new Vector(worldPos.x + 10, worldPos.y + startSize + 10),\n						color : illustrationColor\n					})\n				);\n		}\n	}\n\n	public function drawImmediate() {\n		var worldPos = new Vector(Luxe.screen.width/2, Luxe.screen.height/2); //ugly hack\n\n		Luxe.draw.circle({\n			x : worldPos.x, y : worldPos.y,\n			r : curSize,\n			color : backgroundColor,\n			depth : 0,\n			immediate : true\n		});\n\n		Luxe.draw.ring({\n			x : worldPos.x, y : worldPos.y,\n			r : curSize,\n			color : illustrationColor,\n			depth : 1,\n			immediate : true\n		});\n\n		var sizeDelta = (startSize * endSize) - startSize;\n		if ((curSize - startSize) < sizeDelta/2) {\n			if (curIllustrationIndex != 0) switchIllustration(0);\n		}\n		else {\n			if (curIllustrationIndex != 1) switchIllustration(1);\n		}\n\n		if (curSize >= startSize) {\n			//this is a ridiculous switch statement (remove as soon as possible)\n			switch pullDir {\n				case Direction.Left:\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x - curSize - 30, worldPos.y),\n						p1 : new Vector(worldPos.x - curSize - 10, worldPos.y - 10),\n						color : illustrationColor,\n						immediate : true\n					});\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x - curSize - 30, worldPos.y),\n						p1 : new Vector(worldPos.x - curSize - 10, worldPos.y + 10),\n						color : illustrationColor,\n						immediate : true\n					});\n				case Direction.Right:\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x + curSize + 30, worldPos.y),\n						p1 : new Vector(worldPos.x + curSize + 10, worldPos.y - 10),\n						color : illustrationColor,\n						immediate : true\n					});\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x + curSize + 30, worldPos.y),\n						p1 : new Vector(worldPos.x + curSize + 10, worldPos.y + 10),\n						color : illustrationColor,\n						immediate : true\n					});\n				case Direction.Up:\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x, worldPos.y - curSize - 30),\n						p1 : new Vector(worldPos.x - 10, worldPos.y - curSize - 10),\n						color : illustrationColor,\n						immediate : true\n					});\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x, worldPos.y - curSize - 30),\n						p1 : new Vector(worldPos.x + 10, worldPos.y - curSize - 10),\n						color : illustrationColor,\n						immediate : true\n					});\n				case Direction.Down:\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x, worldPos.y + curSize + 30),\n						p1 : new Vector(worldPos.x - 10, worldPos.y + curSize + 10),\n						color : illustrationColor,\n						immediate : true\n					});\n					Luxe.draw.line({\n						p0 : new Vector(worldPos.x, worldPos.y + curSize + 30),\n						p1 : new Vector(worldPos.x + 10, worldPos.y + curSize + 10),\n						color : illustrationColor,\n						immediate : true\n					});\n			}\n		}\n\n	}\n\n	public function clear() {\n		//Luxe.renderer.batcher.remove(circle);\n		for (g in geo) {\n			Luxe.renderer.batcher.remove(g);\n		}\n	}\n\n	//immediate mode drawing\n	public function drawUI() {\n		var worldPos = terrain.worldPosFromTerrainPos(terrainPos);\n		worldPos.y -= height; //height above the terrain\n\n		Luxe.draw.ring({\n			x : worldPos.x, y : worldPos.y,\n			r : startSize * endSize,\n			color : illustrationColor,\n			depth : 1,\n			immediate : true\n		});\n	}",
-			"settings":
-			{
-				"buffer_size": 8757,
+				"buffer_size": 7064,
 				"line_ending": "Unix"
 			}
 		},
@@ -867,6 +859,15 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"isEditing",
+			"editFrame",
+			"curSize = startSize",
+			"curSize = ",
+			"curIllustration",
+			"complete (",
+			"IGenericActuator {",
+			"complete",
+			"properties",
 			"_onComplete",
 			"endSizeMult",
 			"curbutton",
@@ -985,16 +986,7 @@
 			"groupHandle",
 			"editstate",
 			"editstate(",
-			"editgroup(",
-			"ungroup(",
-			"trace",
-			"movelayer",
-			"layerManager",
-			"layers",
-			"main.layer.set",
-			"removeLaye",
-			"layers",
-			"LayerManager, layers"
+			"editgroup("
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1073,8 +1065,8 @@
 						"selection":
 						[
 							[
-								227,
-								227
+								314,
+								314
 							]
 						],
 						"settings":
@@ -1087,7 +1079,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -1096,27 +1088,28 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3733,
+						"buffer_size": 3901,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								984,
-								984
+								3328,
+								3328
 							]
 						],
 						"settings":
 						{
 							"history_list_is_closing": true,
-							"syntax": "Packages/sublime_haxe/Haxe.tmLanguage"
+							"syntax": "Packages/sublime_haxe/Haxe.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
-						"translation.x": 0.0,
-						"translation.y": 736.0,
+						"translation.x": 116.0,
+						"translation.y": 2008.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -1131,15 +1124,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 5105,
+						"buffer_size": 7064,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2939,
-								2939
+								3941,
+								3950
 							]
 						],
 						"settings":
@@ -1148,8 +1141,8 @@
 							"syntax": "Packages/sublime_haxe/Haxe.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
-						"translation.x": 0.0,
-						"translation.y": 1821.0,
+						"translation.x": 69.0,
+						"translation.y": 2513.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -1157,34 +1150,6 @@
 				},
 				{
 					"buffer": 3,
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8757,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1273,
-								2414
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/sublime_haxe/Haxe.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1117.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
 					"file": "/Users/adamrossledoux/Code/Haxe/libs/luxe/luxe/tween/actuators/GenericActuator.hx",
 					"semi_transient": false,
 					"settings":
@@ -1196,8 +1161,8 @@
 						"selection":
 						[
 							[
-								419,
-								430
+								2728,
+								2738
 							]
 						],
 						"settings":
@@ -1207,10 +1172,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 53.0,
+						"translation.y": 578.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 3,
 					"type": "text"
 				}
 			]
@@ -1244,7 +1209,7 @@
 		"cols":
 		[
 			0.0,
-			0.208453369141,
+			0.63486328125,
 			1.0
 		],
 		"rows":
@@ -1256,7 +1221,7 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 251.0
+		"height": 282.0
 	},
 	"output.find_results":
 	{
